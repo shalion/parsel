@@ -6,7 +6,6 @@ from parsel import Selector
 
 
 class JMESPathTestCase(unittest.TestCase):
-
     def test_json_has_html(self):
         """Sometimes the information is returned in a json wrapper"""
         data = u"""
@@ -35,15 +34,18 @@ class JMESPathTestCase(unittest.TestCase):
         }
         """
         sel = Selector(text=data)
-        self.assertEqual(sel.jmespath(u'html').get(),
-                         u'<div><a>AAA<br>Test</a>aaa</div>'
-                         u'<div><a>BBB</a>bbb<b>BbB</b></div>')
-        self.assertEqual(sel.jmespath(u'html').xpath(u'//div/a/text()').getall(),
-                         [u'AAA', u'Test', u'BBB'])
-        self.assertEqual(sel.jmespath(u'html').css(u'div > b').getall(),
-                         [u'<b>BbB</b>'])
-        self.assertEqual(sel.jmespath(u'content').jmespath(u'name.age').get(),
-                         18)
+        self.assertEqual(
+            sel.jmespath(u"html").get(),
+            u"<div><a>AAA<br>Test</a>aaa</div>" u"<div><a>BBB</a>bbb<b>BbB</b></div>",
+        )
+        self.assertEqual(
+            sel.jmespath(u"html").xpath(u"//div/a/text()").getall(),
+            [u"AAA", u"Test", u"BBB"],
+        )
+        self.assertEqual(
+            sel.jmespath(u"html").css(u"div > b").getall(), [u"<b>BbB</b>"]
+        )
+        self.assertEqual(sel.jmespath(u"content").jmespath(u"name.age").get(), 18)
 
     def test_html_has_json(self):
         html_text = u"""
@@ -77,10 +79,11 @@ class JMESPathTestCase(unittest.TestCase):
         """
         sel = Selector(text=html_text)
         self.assertEqual(
-            sel.xpath(u'//div/content/text()').jmespath(u'user[*].name').getall(),
-            [u'A', u'B', u'C', u'D'])
+            sel.xpath(u"//div/content/text()").jmespath(u"user[*].name").getall(),
+            [u"A", u"B", u"C", u"D"],
+        )
         self.assertEqual(
-            sel.xpath(u'//div/content').jmespath(u'user[*].name').getall(),
-            [u'A', u'B', u'C', u'D'])
-        self.assertEqual(
-            sel.xpath(u'//div/content').jmespath(u'total').get(), 4)
+            sel.xpath(u"//div/content").jmespath(u"user[*].name").getall(),
+            [u"A", u"B", u"C", u"D"],
+        )
+        self.assertEqual(sel.xpath(u"//div/content").jmespath(u"total").get(), 4)
