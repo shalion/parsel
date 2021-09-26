@@ -1,12 +1,11 @@
 import os
 from doctest import ELLIPSIS, NORMALIZE_WHITESPACE
 
+from parsel import Selector
 from sybil import Sybil
 from sybil.parsers.codeblock import CodeBlockParser
 from sybil.parsers.doctest import DocTestParser
 from sybil.parsers.skip import skip
-
-from parsel import Selector
 
 
 def load_selector(filename, **kwargs):

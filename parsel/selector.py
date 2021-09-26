@@ -4,7 +4,7 @@ XPath and JMESPath selectors based on lxml and jmespath
 
 import json
 import typing
-from typing import Any, Dict, List, Mapping, Optional, Pattern, Union
+from typing import Any, Dict, List, Mapping, Optional, Pattern, Type, Union
 
 import jmespath
 import six
@@ -263,7 +263,7 @@ class Selector:
     ]
 
     _default_type: Optional[str] = None
-    _default_namespaces = {
+    _default_namespaces: dict = {
         "re": "http://exslt.org/regular-expressions",
         # supported in libxslt:
         # set:difference
@@ -273,8 +273,8 @@ class Selector:
         # set:trailing
         "set": "http://exslt.org/sets",
     }
-    _lxml_smart_strings = False
-    selectorlist_cls = SelectorList
+    _lxml_smart_strings: bool = False
+    selectorlist_cls: Type[SelectorList] = SelectorList
 
     def __init__(
         self,
@@ -286,7 +286,7 @@ class Selector:
         _expr: Optional[str] = None,
     ) -> None:
         if type not in ("html", "json", "text", "xml", None):
-            raise ValueError("Invalid type: %s" % type)
+            raise ValueError(f"Invalid type: {type}")
 
         self.text = text
 
@@ -294,9 +294,9 @@ class Selector:
             raise ValueError("Selector needs either text or root argument")
 
         if text is not None and not isinstance(text, six.text_type):
-            msg = "text argument should be of type %s, got %s" % (
-                six.text_type,
-                text.__class__,
+            msg = (
+                f"text argument should be of type {six.text_type},"
+                f"got {text.__class__}"
             )
             raise TypeError(msg)
 
@@ -412,7 +412,7 @@ class Selector:
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
             raise ValueError(
-                "Cannot use xpath on a Selector of type {}".format(repr(self.type))
+                f"Cannot use xpath on a Selector of type {repr(self.type)}"
             )
         try:
             xpathev = self.root.xpath
@@ -454,9 +454,7 @@ class Selector:
         if self.type == "text":
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
-            raise ValueError(
-                "Cannot use css on a Selector of type {}".format(repr(self.type))
-            )
+            raise ValueError(f"Cannot use css on a Selector of type {repr(self.type)}")
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> Any:

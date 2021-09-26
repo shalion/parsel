@@ -2,9 +2,10 @@ from functools import lru_cache
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
-from cssselect.xpath import XPathExpr as OriginalXPathExpr
-from cssselect.xpath import _unicode_safe_getattr, ExpressionError
 from cssselect.parser import FunctionalPseudoElement
+from cssselect.xpath import ExpressionError
+from cssselect.xpath import XPathExpr as OriginalXPathExpr
+from cssselect.xpath import _unicode_safe_getattr
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -32,7 +33,7 @@ class XPathExpr(OriginalXPathExpr):
         if self.attribute is not None:
             if path.endswith("::*/*"):
                 path = path[:-2]
-            path += "/@%s" % self.attribute
+            path += f"/@{self.attribute}"
 
         return path
 
@@ -58,24 +59,22 @@ class TranslatorMixin:
         Dispatch method that transforms XPath to support pseudo-element
         """
         if isinstance(pseudo_element, FunctionalPseudoElement):
-            method = "xpath_%s_functional_pseudo_element" % (
-                pseudo_element.name.replace("-", "_")
-            )
+            pseudo_element_ = pseudo_element.name.replace("-", "_")
+            method = f"xpath_{pseudo_element_}_functional_pseudo_element"
             method = _unicode_safe_getattr(self, method, None)
             if not method:
                 raise ExpressionError(
-                    "The functional pseudo-element ::%s() is unknown"
-                    % pseudo_element.name
+                    "The functional pseudo-element ::"
+                    f"{pseudo_element.name}() is unknown"
                 )
             xpath = method(xpath, pseudo_element)
         else:
-            method = "xpath_%s_simple_pseudo_element" % (
-                pseudo_element.replace("-", "_")
-            )
+            pseudo_element_ = pseudo_element.replace("-", "_")
+            method = f"xpath_{pseudo_element_}_simple_pseudo_element"
             method = _unicode_safe_getattr(self, method, None)
             if not method:
                 raise ExpressionError(
-                    "The pseudo-element ::%s is unknown" % pseudo_element
+                    f"The pseudo-element :: {pseudo_element} is unknown"
                 )
             xpath = method(xpath)
         return xpath
@@ -84,8 +83,8 @@ class TranslatorMixin:
         """Support selecting attribute values using ::attr() pseudo-element"""
         if function.argument_types() not in (["STRING"], ["IDENT"]):
             raise ExpressionError(
-                "Expected a single string or ident for ::attr(), got %r"
-                % function.arguments
+                "Expected a single string or ident for ::attr(),"
+                f"got {function.arguments}"
             )
         return XPathExpr.from_xpath(xpath, attribute=function.arguments[0].value)
 
