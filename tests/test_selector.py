@@ -1,19 +1,21 @@
-import re
-import weakref
-import unittest
 import pickle
-from typing import Any
+import re
+import unittest
+import weakref
+from typing import Any, Type
 
+import lxml.etree
+import six
 from parsel import Selector, SelectorList
 from parsel.selector import (
-    CannotRemoveElementWithoutRoot,
     CannotRemoveElementWithoutParent,
+    CannotRemoveElementWithoutRoot,
 )
 
 
 class SelectorTestCase(unittest.TestCase):
 
-    sscls = Selector
+    sscls: Type[Selector] = Selector
 
     def assertIsSelector(self, value: Any) -> None:
         self.assertEqual(type(value), type(self.sscls(text="")))
@@ -196,19 +198,17 @@ class SelectorTestCase(unittest.TestCase):
         )
 
     def test_representation_slice(self) -> None:
-        body = "<p><input name='{}' value='\xa9'/></p>".format(50 * "b")
+        body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
         sel = self.sscls(text=body)
 
-        representation = "<Selector xpath='//input/@name' data='{}...'>".format(
-            37 * "b"
-        )
+        representation = f"<Selector xpath='//input/@name' data='{37 * 'b'}...'>"
 
         self.assertEqual(
             [repr(it) for it in sel.xpath("//input/@name")], [representation]
         )
 
     def test_representation_unicode_query(self) -> None:
-        body = "<p><input name='{}' value='\xa9'/></p>".format(50 * "b")
+        body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
 
         representation = "<Selector xpath='//input[@value=\"©\"]/@value' data='©'>"
 
@@ -807,9 +807,9 @@ class SelectorTestCase(unittest.TestCase):
         """Check that classes are using slots and are weak-referenceable"""
         x = self.sscls(text="")
         weakref.ref(x)
-        assert not hasattr(x, "__dict__"), (
-            "%s does not use __slots__" % x.__class__.__name__
-        )
+        assert not hasattr(
+            x, "__dict__"
+        ), f"{x.__class__.__name__} does not use __slots__"
 
     def test_remove_namespaces(self) -> None:
         xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -1007,6 +1007,51 @@ class SelectorTestCase(unittest.TestCase):
 
         sel.css("body").remove()
         self.assertEqual(sel.get(), "<html></html>")
+
+    def test_invalid_type(self):
+        with self.assertRaises(ValueError):
+            self.sscls("", type="xhtml")
+
+    def test_default_type(self):
+        text = "foo"
+        selector = self.sscls(text)
+        self.assertEqual(selector.type, "html")
+
+    def test_json_type(self):
+        obj = 1
+        selector = self.sscls(six.text_type(obj), type="json")
+        self.assertEqual(selector.root, obj)
+        self.assertEqual(selector.type, "json")
+
+    def test_html_root(self):
+        root = lxml.etree.fromstring("<html/>")
+        selector = self.sscls(root=root)
+        self.assertEqual(selector.root, root)
+        self.assertEqual(selector.type, "html")
+
+    def test_json_root(self):
+        obj = 1
+        selector = self.sscls(root=obj)
+        self.assertEqual(selector.root, obj)
+        self.assertEqual(selector.type, "json")
+
+    def test_json_xpath(self):
+        obj = 1
+        selector = self.sscls(root=obj)
+        with self.assertRaises(ValueError):
+            selector.xpath("//*")
+
+    def test_json_css(self):
+        obj = 1
+        selector = self.sscls(root=obj)
+        with self.assertRaises(ValueError):
+            selector.css("*")
+
+    def test_invalid_json(self):
+        text = "<html/>"
+        selector = self.sscls(text, type="json")
+        self.assertEqual(selector.root, None)
+        self.assertEqual(selector.type, "json")
 
 
 class ExsltTestCase(unittest.TestCase):

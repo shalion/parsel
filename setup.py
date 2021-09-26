@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, __version__ as setuptools_version
-
+from setuptools import setup
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
@@ -28,6 +27,8 @@ setup(
         "cssselect>=0.9",
         "lxml",
         "w3lib>=1.19.0",
+        "six>=1.6.0",
+        "jmespath",
     ],
     python_requires=">=3.6",
     license="BSD",
