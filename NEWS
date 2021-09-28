@@ -3,6 +3,11 @@
 History
 -------
 
+1.7.0 (2020-09-28)
+~~~~~~~~~~~~~~~~~~
+
+* New ``Selector.jmespath()`` and ``SelectorList.jmespath()`` methods to
+  use JMESPath selectors
 * Add PEP 561-style type information
 
 1.6.0 (2020-05-07)

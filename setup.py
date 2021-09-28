@@ -10,10 +10,13 @@ with open("NEWS") as history_file:
 
 setup(
     name="parsel",
-    version="1.6.0",
-    description="Parsel is a library to extract data from HTML and XML using XPath and CSS selectors",
+    version="1.7.0",
+    description="""
+        Parsel is a library to extract data from HTML and XML and JSON
+         using XPath, CSS and JMESPath selectors
+        """,
     long_description=readme + "\n\n" + history,
-    author="Scrapy project",
+    author="Scrapy project, forked by Shalion",
     author_email="info@scrapy.org",
     url="https://github.com/scrapy/parsel",
     packages=[
