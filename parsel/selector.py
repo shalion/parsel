@@ -467,7 +467,9 @@ class Selector:
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return extract_regex(regex, self.get(), replace_entities=replace_entities)
+        return extract_regex(
+            regex, six.text_type(self.get()), replace_entities=replace_entities
+        )
 
     @typing.overload
     def re_first(
