@@ -1,5 +1,8 @@
+import html
+import json
 import re
 from typing import Any, List, Pattern, Union
+
 from w3lib.html import replace_entities as w3lib_replace_entities
 
 
@@ -93,3 +96,23 @@ def shorten(text: str, width: int, suffix: str = "...") -> str:
     if width >= 0:
         return suffix[len(suffix) - width :]
     raise ValueError("width must be equal or greater than 0")
+
+
+_scape_sequences_regex = re.compile(r"[\r\n\t\f]+")
+_commentline_regex = re.compile(r"\s*((^:)//.*|<!--(.|\n)*-->)")
+
+
+def clean_web_comments(text: str) -> str:
+    """Clean web comments and scape sequences from text."""
+    text = _scape_sequences_regex.sub("", text)
+    text = _commentline_regex.sub("", text)
+    text = html.unescape(text)
+    return text
+
+
+def load_json_or_none(text: str) -> Union[dict, list]:
+    """Try to load json from text, return None if fail."""
+    try:
+        return json.loads(clean_web_comments(text))
+    except ValueError:
+        return None

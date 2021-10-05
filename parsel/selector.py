@@ -2,7 +2,6 @@
 XPath and JMESPath selectors based on lxml and jmespath
 """
 
-import json
 import typing
 from typing import Any, Dict, List, Mapping, Optional, Pattern, Type, Union
 
@@ -11,7 +10,7 @@ import six
 from lxml import etree, html
 
 from .csstranslator import GenericTranslator, HTMLTranslator
-from .utils import extract_regex, flatten, iflatten, shorten
+from .utils import extract_regex, flatten, iflatten, load_json_or_none, shorten
 
 _SelectorType = typing.TypeVar("_SelectorType", bound="Selector")
 
@@ -229,13 +228,6 @@ class SelectorList(List[_SelectorType]):
 _NOTSET = object()
 
 
-def _load_json_or_none(text):
-    try:
-        return json.loads(text)
-    except ValueError:
-        return None
-
-
 class Selector:
     """
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
@@ -304,7 +296,7 @@ class Selector:
             if type in ("html", "xml", None):
                 self._load_lxml_root(text, type=type or "html", base_url=base_url)
             elif type == "json":
-                self.root = _load_json_or_none(text)
+                self.root = load_json_or_none(text)
                 self.type = type
             else:
                 self.root = text
@@ -365,11 +357,11 @@ class Selector:
         if self.type == "json":
             data = self.root
         elif isinstance(self.root, six.string_types):
-            data = _load_json_or_none(self.root)
+            data = load_json_or_none(self.root)
         elif self.root.text is None:
-            data = _load_json_or_none(self.text)
+            data = load_json_or_none(self.text)
         else:
-            data = _load_json_or_none(self.root.text)
+            data = load_json_or_none(self.root.text)
         result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
