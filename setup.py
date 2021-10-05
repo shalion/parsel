@@ -10,7 +10,7 @@ with open("NEWS") as history_file:
 
 setup(
     name="parsel",
-    version="1.7.1",
+    version="1.7.2",
     description="""
         Parsel is a library to extract data from HTML and XML and JSON
          using XPath, CSS and JMESPath selectors
